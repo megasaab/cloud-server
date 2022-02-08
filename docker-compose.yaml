@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+ cloud-api:
+  build: ./
+  command: npm run start
+  restart: unless-stopped
+  environment:
+    - JWT_SECRET_KEY=dasdadsadqeqeq
+  ports:
+    - 5001:5001
+  depends_on:
+    - mongoDataBase
+  networks: 
+    - megasaab-docker-network
+    # - https
+ 
+ mongoDataBase:
+  image: 'mongo'
+  environment:
+    - MONGO_INITDB_ROOT_USERNAME=root
+    - MONGO_INITDB_ROOT_PASSWORD=root
+
+  volumes:
+    - mongodb_api:/data/db
+  networks: 
+    - megasaab-docker-network
+
+volumes:
+ mongodb_api:
+
+networks: 
+  # https:
+  #   external:
+  #     name: https_network
+  megasaab-docker-network:
+    driver: bridge
