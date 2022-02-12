@@ -26,6 +26,16 @@ class FileController {
             return res.status(400).json();
         }
     }
+
+    async fetchFiles(req: any, res: Response) {
+        try {
+            const files = await fileSchema.find({user: req.user.id, parent: req.query.parent});
+            return res.json(files);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({message: "Can not get files"});
+        }
+    }
 }
 
 export const fileController = new FileController();
