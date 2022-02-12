@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const User = new mongoose.Schema({
     email: {type: String, required: true, unique: true},
@@ -6,10 +6,10 @@ const User = new mongoose.Schema({
     diskSpace: {type: Number, default: 1024**3*10},
     usedSpace: {type: Number, default: 0},
     avatar: {type: String},
-    files: [{type: Object, ref: 'File'}]
+    files: [{type: Schema.Types.ObjectId, ref: 'File'}]
 });
 
-export const userSchema = mongoose.model('user', User);
+export const userSchema = mongoose.model('User', User);
 
 export interface UserI {
     email: string;

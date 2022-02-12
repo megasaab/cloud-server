@@ -5,7 +5,9 @@ import { check, validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET_KEY } from "../constants";
 import { resourceLimits } from "worker_threads";
-import { AuthMiddleware } from "../moddleware/auth.middleware";
+import { AuthMiddleware } from "../middleware/auth.middleware";
+import { fileService } from "../services/fileService";
+import { fileSchema } from "../schemas/file";
 
 export const authRouter: Router = express.Router();
 
@@ -36,6 +38,7 @@ authRouter.post('/registration',
             const user = new userSchema({ email, password: hashPassword });
 
             await user.save();
+            await fileService.createDir(new fileSchema({user: user.id, name: ''}))
             return res.json({ message: "User was created" });
 
         } catch (error) {
@@ -82,7 +85,7 @@ authRouter.post('/login',
     authRouter.get('/auth', AuthMiddleware,
     async (req: any, res: Response) => {
         try {
-
+            
             const user = await userSchema.findOne({_id: req.user.id});
             const token = jwt.sign({id: user.id}, JWT_SECRET_KEY, {expiresIn: '1h'});
             return res.json({

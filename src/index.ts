@@ -3,12 +3,14 @@ import mongoose from 'mongoose';
 import { MONGODB_PASS, MONGODB_USER, MONGO_URL, PORT } from './constants';
 import { authRouter } from './routes/auth.routes';
 import cors from 'cors';
+import { fileRouter } from './routes/file.routes';
 
 const app = express();
 
 app.use(cors());
 app.use(json()); // for parsing application/json
 app.use('/api/auth', authRouter);
+app.use('/api/files', fileRouter);
 
 const init = async (): Promise<void> => {
     app.listen(PORT, () => {

@@ -6,6 +6,9 @@ services:
   command: npm run start
   restart: unless-stopped
   environment:
+    - MONGO_INITDB_ROOT_USERNAME=root
+    - MONGO_INITDB_ROOT_PASSWORD=root
+    - MONGODB_URL=mongodb://mongoDataBase:27017/cloud-server
     - JWT_SECRET_KEY=dasdadsadqeqeq
   ports:
     - 5001:5001

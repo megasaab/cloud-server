@@ -15,6 +15,7 @@ export const AuthMiddleware = (req: any, res: Response, next: Function) => {
 
         const decoded = jwt.verify(token, JWT_SECRET_KEY);
         req.user = decoded
+        next();
         
     } catch (error) {
         return res.status(401).json({message: 'Auth Error'});
