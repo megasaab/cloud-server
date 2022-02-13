@@ -6,3 +6,4 @@ export const fileRouter: Router = express.Router();
 
 fileRouter.post('', AuthMiddleware, fileController.createDir);
 fileRouter.get('', AuthMiddleware, fileController.fetchFiles);
+fileRouter.post('/upload', AuthMiddleware, fileController.uploadFile);

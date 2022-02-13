@@ -8,6 +8,7 @@ const File = new mongoose.Schema({
     size: {type: Number, default: 0},
     path: {type: String, default: ''},
     user: {type: Schema.Types.ObjectId, ref: 'User'},
+    date: {type: Date, default: Date.now()},
     parent: {type: Schema.Types.ObjectId, ref: 'User'},
     childs: [{type: Schema.Types.ObjectId, ref: 'User'}],
 });
