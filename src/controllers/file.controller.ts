@@ -5,6 +5,7 @@ import { userSchema } from "../schemas/user";
 import { fileService } from "../services/fileService";
 import filepath from "path";
 import fs from "fs";
+import path from 'path';
 
 class FileController {
     async createDir(req: any, res: Response) {
@@ -87,6 +88,25 @@ class FileController {
             return res.status(500).json({ message: "Upload error" });
         }
     }
+
+    async downloadFile(req: any, res: Response) {
+        try {
+            const file = await fileSchema.findOne({_id: req.query.id, user: req.user.id});
+            const pth =  path.join(FILE_PATH, `${req.user.id}`,  `${file.path}`, `${file.name}`);
+
+            if (fs.existsSync(pth)) {
+                res.download(pth, file.name);
+            }
+
+            return res.status(40).json({message: 'File not found'});
+            
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({message: 'Download file Error'});
+        }
+    }
+
+
 }
 
 export const fileController = new FileController();
