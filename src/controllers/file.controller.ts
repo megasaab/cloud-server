@@ -96,9 +96,9 @@ class FileController {
 
             if (fs.existsSync(pth)) {
                 res.download(pth, file.name);
+            } else {
+                return res.status(404).json({message: 'File not found'});
             }
-
-            return res.status(40).json({message: 'File not found'});
             
         } catch (error) {
             console.log(error);
