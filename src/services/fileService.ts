@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { resolve } from 'path/posix';
+import path from 'path';
 import { FILE_PATH } from '../constants';
 import { FileI, fileSchema } from '../schemas/file';
 
@@ -7,7 +8,7 @@ class FileService {
     
 
     createDir(file: FileI): Promise<any> {
-        const filePath = `${FILE_PATH}\\${file.user}\\${file.path}`;
+        const filePath = path.join(`${FILE_PATH}`,`${file.user}`,`${file.path}`);
         
         return new Promise((resolve, reject) => {
             try {

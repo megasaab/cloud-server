@@ -19,7 +19,7 @@ class FileController {
                 file.path = name;
                 await fileService.createDir(file);
             } else {
-                file.path = `${parentFile.path}\\${file.name}`;
+                file.path = path.join(`${parentFile.path}`,`${file.name}`);
                 await fileService.createDir(file);
                 parentFile.childs.push(file._id);
                 await parentFile.save();
@@ -83,7 +83,7 @@ class FileController {
 
             res.json(dbFile);
 
-        } catch (error) {
+        } catch (error) { 
             console.log(error);
             return res.status(500).json({ message: "Upload error" });
         }
