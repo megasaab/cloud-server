@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { FILE_PATH } from "../constants";
 import { fileSchema } from "../schemas/file";
 import { userSchema } from "../schemas/user";
@@ -6,6 +6,7 @@ import { fileService } from "../services/fileService";
 import filepath from "path";
 import fs from "fs";
 import path from 'path';
+import { equal } from "assert";
 
 class FileController {
     async createDir(req: any, res: Response) {
@@ -19,7 +20,7 @@ class FileController {
                 file.path = name;
                 await fileService.createDir(file);
             } else {
-                file.path = path.join(`${parentFile.path}`,`${file.name}`);
+                file.path = path.join(`${parentFile.path}`, `${file.name}`);
                 await fileService.createDir(file);
                 parentFile.childs.push(file._id);
                 await parentFile.save();
@@ -34,7 +35,19 @@ class FileController {
 
     async fetchFiles(req: any, res: Response) {
         try {
-            const files = await fileSchema.find({ user: req.user.id, parent: req.query.parent });
+            const { sort } = req.query;
+            let files;
+            switch (sort) {
+                case '1':
+                    files = await fileSchema.find({ user: req.user.id, parent: req.query.parent }).sort({ name: 1 });
+                    break;
+                case '-1':
+                    files = await fileSchema.find({ user: req.user.id, parent: req.query.parent }).sort({ type: -1 });
+                    break;
+                default:
+                    files = await fileSchema.find({ user: req.user.id, parent: req.query.parent });
+                    break;
+            }
             return res.json(files);
         } catch (error) {
             console.log(error);
@@ -69,11 +82,15 @@ class FileController {
             file.mv(path);
 
             const type = file.name.split('.').pop();
+            let filePth = file.name;
+            if (parent) {
+                filePth = filepath.join(`${parent.path}`, file.name)
+            }
             const dbFile = new fileSchema({
                 name: file.name,
                 type,
                 size: file.size,
-                path: parent?.path,
+                path: filePth,
                 parent: parent?._id,
                 user: user._id
             });
@@ -83,7 +100,7 @@ class FileController {
 
             res.json(dbFile);
 
-        } catch (error) { 
+        } catch (error) {
             console.log(error);
             return res.status(500).json({ message: "Upload error" });
         }
@@ -91,20 +108,50 @@ class FileController {
 
     async downloadFile(req: any, res: Response) {
         try {
-            const file = await fileSchema.findOne({_id: req.query.id, user: req.user.id});
-            const pth =  path.join(FILE_PATH, `${req.user.id}`,  `${file.path}`, `${file.name}`);
+            const file = await fileSchema.findOne({ _id: req.query.id, user: req.user.id });
+            const pth = path.join(FILE_PATH, `${req.user.id}`, `${file.path}`, `${file.name}`);
 
             if (fs.existsSync(pth)) {
                 res.download(pth, file.name);
             } else {
-                return res.status(404).json({message: 'File not found'});
+                return res.status(404).json({ message: 'File not found' });
             }
-            
+
         } catch (error) {
             console.log(error);
-            res.status(500).json({message: 'Download file Error'});
+            res.status(500).json({ message: 'Download file Error' });
         }
     }
+
+    async deleteFile(req: any, res: Response) {
+        try {
+            const file = await fileSchema.findOne({ _id: req.query.id, user: req.user.id });
+            if (!file) {
+                return res.status(404).json({ message: 'File not found' });
+            }
+            fileService.deleteFile(file);
+            await file.remove();
+            return res.json({ message: 'File was deleted' });
+        } catch (error) {
+            console.log(error);
+            return res.json({ message: 'cannot delete' });
+        }
+    }
+
+    async searchFile(req: any, res: Response) {
+        try {
+            const searchName = req.query.search;
+            let files = await fileSchema.find({user: req.user.id });
+            files = files.filter(file => file.name.includes(searchName));
+            return res.json(files);
+
+        } catch (error) {
+            console.log(error);
+            return res.status(400).json({message: 'search error'});
+        }
+    }
+
+
 
 
 }
